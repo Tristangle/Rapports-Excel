@@ -1,10 +1,14 @@
 #Objectif » Récupérer les noms et champs de tables dans un Excel, puis générer un nouvel Excel avec un Script PowerShell
 
-# Définit l'emplacement du dossier comportant les extraits d'IFS
-$emplacement = Set-Location -Path "C:\Users\tb50919\Documents\databaseExport"
+# Définir l'emplacement dans une fênetre parcourir 
+ Add-Type -AssemblyName System.Windows.Forms
+ $browser = New-Object System.Windows.Forms.FolderBrowserDialog
+ $null = $browser.ShowDialog()
+ $cheminDossier= $browser.SelectedPath
+#emplacement = Set-Location -Path "C:\Users\tb50919\Documents\databaseExport"
 
-# Lister les fichiers présents
-$dossier = Get-ChildItem($emplacement)
+# Lister les fichiers présents, en excluant les dossier
+$dossier = Get-ChildItem -Path $cheminDossier -Filter "*.xlsx" | Where-Object { !$_.PSIsContainer }
 
 # Créer un objet Excel afin d'utiliser les fonctions associées à Excel
 $excel = New-Object -ComObject Excel.Application
@@ -67,10 +71,15 @@ $dateFrancaise = $dateActuelle.ToString("dd MMMM yyyy", [System.Globalization.Cu
 
 #Définit le nom du fichier Excel prochainement enregistré
 $nomRapport = "Rapport $dateFrancaise"
-
+$nomDossierRapport = "$cheminDossier\$nomRapport"
+$variableDoublon = 1
+while(Test-Path -Path $nomDossierRapport) {
+    $nomDossierRapport = "$cheminDossier\$nomRapport\$variableDoublon"
+    $variableDoublon++
+}
+$dossierRapport = New-Item -Path $nomDossierRapport -ItemType Directory -Force
 #Définit le chemin du fichier prochainement enregistré
-$chemin = "C:\Users\tb50919\Documents"
-$cheminSauvegarde = Join-Path -Path $chemin -ChildPath $nomRapport
+$cheminSauvegarde = Join-Path -Path $dossierRapport -ChildPath $nomRapport
 
 # Enregistre le fichier Excel dans le dossier
 $FeuilleRapport.SaveAs($cheminSauvegarde)
