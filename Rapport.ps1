@@ -1,11 +1,13 @@
 #Objectif » Récupérer les noms et champs de tables dans un Excel, puis générer un nouvel Excel avec un Script PowerShell
 
+
 # Définir l'emplacement dans une fênetre parcourir 
  Add-Type -AssemblyName System.Windows.Forms
  $browser = New-Object System.Windows.Forms.FolderBrowserDialog
+
  $null = $browser.ShowDialog()
+
  $cheminDossier= $browser.SelectedPath
-#emplacement = Set-Location -Path "C:\Users\tb50919\Documents\databaseExport"
 
 # Lister les fichiers présents, en excluant les dossier
 $dossier = Get-ChildItem -Path $cheminDossier -Filter "*.xlsx" | Where-Object { !$_.PSIsContainer }
@@ -49,6 +51,7 @@ foreach($fichier in $dossier){
 
         # Copier les champs de table puis les coller dans l'Excel de rapport
         $FeuilleRapport.Cells.Item($emplacementChamps, $emplacementNom) = $champ
+
         #Incrémenter la nouvelle position du champs de table vide
         $emplacementChamps++
     }
@@ -71,13 +74,21 @@ $dateFrancaise = $dateActuelle.ToString("dd MMMM yyyy", [System.Globalization.Cu
 
 #Définit le nom du fichier Excel prochainement enregistré
 $nomRapport = "Rapport $dateFrancaise"
+#
 $nomDossierRapport = "$cheminDossier\$nomRapport"
+
 $variableDoublon = 1
+
 while(Test-Path -Path $nomDossierRapport) {
+
     $nomDossierRapport = "$cheminDossier\$nomRapport\$variableDoublon"
+
     $variableDoublon++
+
 }
+
 $dossierRapport = New-Item -Path $nomDossierRapport -ItemType Directory -Force
+
 #Définit le chemin du fichier prochainement enregistré
 $cheminSauvegarde = Join-Path -Path $dossierRapport -ChildPath $nomRapport
 
