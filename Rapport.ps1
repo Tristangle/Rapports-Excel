@@ -1,48 +1,79 @@
 #Objectif » Récupérer les noms et champs de tables dans un Excel, puis générer un nouvel Excel avec un Script PowerShell
 
-# Acceder à un dossier
+# Définit l'emplacement du dossier comportant les extraits d'IFS
 $emplacement = Set-Location -Path "C:\Users\tb50919\Documents\databaseExport"
+
 # Lister les fichiers présents
 $dossier = Get-ChildItem($emplacement)
 
-#Write-Output($liste)
-
-# Créer le fichier Excel de rapport
+# Créer un objet Excel afin d'utiliser les fonctions associées à Excel
 $excel = New-Object -ComObject Excel.Application
+
+# Permet de voir l'excel, sans cela l'utilisateur ne verra pas les excels
 $excel.Visible = $True
+
+# Permet d'éviter les confirmations manuelles, comme pour la fermeture d'un Excel
 $excel.DisplayAlerts = $False
 
-# Ouvre une page dans le fichier de Rapport
+# Créer un excel et une feuille excel
 $Rapport = $excel.Workbooks.add()
 $FeuilleRapport = $Rapport.worksheets.Item(1)
-# Boucle sur la liste des Excels présents dans le dossier
+
+# Définit les valeurs de positions
 $emplacementNom = 1
 $emplacementChamps = 3
+
+# Boucle sur la liste des Excels présents dans le dossier
 foreach($fichier in $dossier){
+
     # Ouvrir le fichier existant
     $nomFichier = $fichier.FullName
     $fichierExcel = $excel.Workbooks.Open($nomFichier)
 
-    # Copier le nom du fichier, puis le coller dans le Rapport
-    $FeuilleRapport.Cells.Item(1, $emplacementNom) = $fichier.Name
+    # Copier le nom du fichier sans extensions, puis le coller dans le Rapport
+    $nomSansExtension = [System.IO.Path]::GetFileNameWithoutExtension($fichier.Name)
+    $FeuilleRapport.Cells.Item(1, $emplacementNom) = $nomSansExtension
+
     # Accéder à la feuille de calcul du fichier Excel ouvert
     $feuilleExcel = $fichierExcel.Worksheets.Item(1)
+
     # Boucle sur la liste des champs de la table
     foreach ($cellule in $feuilleExcel.UsedRange.Columns) {
+
+        #Copier la valeur brute de la cellule sans tenir compte du format
         $champ = $cellule.Cells.Item(1, 1).Value2
+
         # Copier les champs de table puis les coller dans l'Excel de rapport
         $FeuilleRapport.Cells.Item($emplacementChamps, $emplacementNom) = $champ
+        #Incrémenter la nouvelle position du champs de table vide
         $emplacementChamps++
     }
+
+    #Réinitialise la position du champs au départ
     $emplacementChamps = 3
+
+    # Actualise la nouvelle position pour le nom
     $emplacementNom = $emplacementNom +=2
 
-
+    #Ferme le fichier
     $fichierExcel.Close()
 }
-#Redimensionner la cellule pour avoir un résultat lisible 
+#Redimensionner les cellules pour avoir un résultat lisible 
 $FeuilleRapport.Columns.AutoFit()
+
+#Récupère la date et la transforme en date française 
+$dateActuelle = Get-Date
+$dateFrancaise = $dateActuelle.ToString("dd MMMM yyyy", [System.Globalization.CultureInfo]::GetCultureInfo("fr-FR"))
+
+#Définit le nom du fichier Excel prochainement enregistré
+$nomRapport = "Rapport $dateFrancaise"
+
+#Définit le chemin du fichier prochainement enregistré
+$chemin = "C:\Users\tb50919\Documents"
+$cheminSauvegarde = Join-Path -Path $chemin -ChildPath $nomRapport
+
 # Enregistre le fichier Excel dans le dossier
-#$Rapport.SaveAs($emplacement)
-#$Rapport.Close()
-#$excel.Quit()
+$FeuilleRapport.SaveAs($cheminSauvegarde)
+
+#Ferme Excel
+$excel.Quit()
