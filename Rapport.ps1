@@ -74,19 +74,21 @@ $dateFrancaise = $dateActuelle.ToString("dd MMMM yyyy", [System.Globalization.Cu
 
 #Définit le nom du fichier Excel prochainement enregistré
 $nomRapport = "Rapport $dateFrancaise"
-#
+# Définit le chemin du dossier
 $nomDossierRapport = "$cheminDossier\$nomRapport"
 
 $variableDoublon = 1
 
 while(Test-Path -Path $nomDossierRapport) {
 
+    # Définit un nouveau chemin dans le cas où le chemin est déjà existant
     $nomDossierRapport = "$cheminDossier\$nomRapport\$variableDoublon"
-
+    # Augmente la variable
     $variableDoublon++
 
 }
 
+# Créer un dossier de rapport
 $dossierRapport = New-Item -Path $nomDossierRapport -ItemType Directory -Force
 
 #Définit le chemin du fichier prochainement enregistré
