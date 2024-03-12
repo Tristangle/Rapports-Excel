@@ -6,7 +6,7 @@
  $browser = New-Object System.Windows.Forms.FolderBrowserDialog
 
  $null = $browser.ShowDialog()
-
+# Enregistrer le chemin choisi
  $cheminDossier= $browser.SelectedPath
 
 # Lister les fichiers présents, en excluant les dossier
@@ -16,7 +16,7 @@ $dossier = Get-ChildItem -Path $cheminDossier -Filter "*.xlsx" | Where-Object { 
 $excel = New-Object -ComObject Excel.Application
 
 # Permet de voir l'excel, sans cela l'utilisateur ne verra pas les excels
-$excel.Visible = $True
+$excel.Visible = $false
 
 # Permet d'éviter les confirmations manuelles, comme pour la fermeture d'un Excel
 $excel.DisplayAlerts = $False
