@@ -5,6 +5,9 @@
  Add-Type -AssemblyName System.Windows.Forms
  $browser = New-Object System.Windows.Forms.FolderBrowserDialog
 
+# Boîte de dialogue de lancement
+[System.Windows.Forms.MessageBox]::Show("Debut de l'execution", "Information", "OK", [System.Windows.Forms.MessageBoxIcon]::Information)
+
  $null = $browser.ShowDialog()
 # Enregistrer le chemin choisi
  $cheminDossier= $browser.SelectedPath
@@ -15,7 +18,7 @@ $dossier = Get-ChildItem -Path $cheminDossier -Filter "*.xlsx" | Where-Object { 
 # Créer un objet Excel afin d'utiliser les fonctions associées à Excel
 $excel = New-Object -ComObject Excel.Application
 
-# Permet de voir l'excel, sans cela l'utilisateur ne verra pas les excels
+# Cacher l'application Excel
 $excel.Visible = $false
 
 # Permet d'éviter les confirmations manuelles, comme pour la fermeture d'un Excel
@@ -99,3 +102,11 @@ $FeuilleRapport.SaveAs($cheminSauvegarde)
 
 #Ferme Excel
 $excel.Quit()
+
+# Libérer les ressources utilisées par l'objet Excel
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+
+# Boîte de dialogue de fermeture
+[System.Windows.Forms.MessageBox]::Show("Fin de l'execution", "Information", "OK", [System.Windows.Forms.MessageBoxIcon]::Information)
+
+exit
